@@ -1,0 +1,204 @@
+.heroWrapper {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.heroIzquierda {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.bienvenida {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.bienvenidaTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.greeting {
+  font-size: 1.4rem;
+  color: var(--color-primary);
+  margin-bottom: 0.25rem;
+}
+
+.fecha {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+}
+
+.rolBadge {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  padding: 0.35rem 0.875rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.miniGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.miniStat {
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 0.875rem 1rem;
+}
+
+.miniLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.miniValor {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.imagenCard {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: sticky;
+  top: 1.5rem;
+  height: calc(100vh - 120px);
+  box-shadow: var(--shadow-sm);
+}
+
+.imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.imagenOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+  padding: 1.25rem 1rem 1rem;
+}
+
+.imagenTitulo {
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.imagenSub {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.8rem;
+}
+
+.seccion {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin-bottom: -0.25rem;
+}
+
+.gridOp {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.875rem;
+}
+
+.gridCat {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.875rem;
+}
+
+.tarjeta {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.tarjeta:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.tarjetaAccent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.tarjetaIcono {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 0.875rem;
+}
+
+.tarjetaValor {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+  line-height: 1;
+}
+
+.tarjetaValorChico {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.25rem;
+  line-height: 1;
+}
+
+.tarjetaLabel {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.skeleton {
+  height: 1.75rem;
+  width: 50%;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.25rem;
+  animation: shimmer 1.2s infinite;
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

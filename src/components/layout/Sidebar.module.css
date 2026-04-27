@@ -1,0 +1,61 @@
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: var(--color-secondary);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.logo {
+  padding: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoImg {
+  width: 300px;
+  object-fit: contain;
+}
+
+.logoIcon {
+  font-size: 1.5rem;
+}
+
+.logoText {
+  font-size: 1.3rem;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.logoText strong {
+  color: var(--color-primary-light);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+  flex: 1;
+}
+
+.link {
+  padding: 0.75rem 1.25rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+  transition: var(--transition);
+  border-left: 3px solid transparent;
+}
+
+.link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.active {
+  background: rgba(192, 57, 43, 0.25);
+  color: #fff;
+  border-left-color: var(--color-primary-light);
+}

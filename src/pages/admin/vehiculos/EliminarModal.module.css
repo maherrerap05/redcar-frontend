@@ -1,0 +1,124 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow-lg);
+}
+
+.titulo {
+  font-size: 1.1rem;
+  color: var(--color-danger);
+  margin-bottom: 0.75rem;
+}
+
+.descripcion {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.textarea {
+  padding: 0.65rem 0.875rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  border-color: var(--color-danger);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.btnCancelar {
+  padding: 0.6rem 1.25rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  transition: var(--transition);
+}
+
+.btnCancelar:hover {
+  border-color: var(--color-text-muted);
+}
+
+.btnConfirmar {
+  padding: 0.6rem 1.25rem;
+  background: var(--color-danger);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.btnConfirmar:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.btnConfirmar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnVer {
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #EAF3DE;
+  color: #3B6D11;
+  transition: var(--transition);
+}
+
+.btnVer:hover {
+  background: #3B6D11;
+  color: white;
+}
+
+.btnEditar:disabled,
+.btnEliminar:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}

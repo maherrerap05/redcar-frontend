@@ -1,0 +1,68 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem 0 0.5rem;
+}
+
+.btn {
+  padding: 0.45rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  transition: var(--transition);
+  background: var(--color-bg-card);
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.paginas {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pagina {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  background: var(--color-bg-card);
+  transition: var(--transition);
+}
+
+.pagina:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.activa {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+.activa:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: white;
+}
+
+.ellipsis {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  padding: 0 0.25rem;
+}
