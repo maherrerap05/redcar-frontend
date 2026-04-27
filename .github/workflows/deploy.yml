@@ -27,16 +27,32 @@ jobs:
       - name: Prepare deployment package
         run: |
           cp server.cjs dist/server.cjs
-          echo '{
-            "name": "redcar-frontend",
-            "version": "1.0.0",
-            "scripts": {
-              "start": "node server.cjs"
-            },
-            "dependencies": {
-              "express": "^5.2.1"
-            }
-          }' > dist/package.json
+          cat > dist/web.config << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <rewrite>
+                <rules>
+                  <rule name="SPA" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                    </conditions>
+                    <action type="Rewrite" url="/index.html" />
+                  </rule>
+                </rules>
+              </rewrite>
+              <staticContent>
+                <mimeMap fileExtension=".js" mimeType="application/javascript" />
+                <mimeMap fileExtension=".css" mimeType="text/css" />
+                <mimeMap fileExtension=".json" mimeType="application/json" />
+                <mimeMap fileExtension=".svg" mimeType="image/svg+xml" />
+                <mimeMap fileExtension=".woff" mimeType="font/woff" />
+                <mimeMap fileExtension=".woff2" mimeType="font/woff2" />
+              </staticContent>
+            </system.webServer>
+          </configuration>
+          EOF
           cd dist
           zip -r ../deploy.zip .
 
