@@ -28,12 +28,12 @@ jobs:
         run: |
           cp server.cjs dist/server.cjs
           cp package.json dist/package.json
-          cd dist
-          npm install --omit=dev --prefix .
 
-      - name: Deploy to Azure
-        uses: azure/webapps-deploy@v2
+      - name: Deploy to Azure via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          app-name: RedCarFrontend
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          package: dist
+          server: waws-prod-cq1-033.ftp.azurewebsites.windows.net
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: dist/
+          server-dir: /site/wwwroot/
