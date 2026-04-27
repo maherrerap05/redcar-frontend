@@ -28,14 +28,14 @@ jobs:
         run: |
           cp server.cjs dist/server.cjs
           cp package.json dist/package.json
+          cd dist
+          zip -r ../deploy.zip .
 
-      - name: Deploy to Azure via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: Login to Azure
+        uses: azure/login@v1
         with:
-          server: waws-prod-cq1-033.ftp.azurewebsites.windows.net
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: dist/
-          server-dir: /site/wwwroot/
-          protocol: ftps
-          port: 990
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy zip to Azure
+        run: |
+          az webapp deploy --resource-group RedCar --name RedCarFrontend --src-path deploy.zip --type zip
