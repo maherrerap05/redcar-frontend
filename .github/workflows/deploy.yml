@@ -27,7 +27,16 @@ jobs:
       - name: Prepare deployment package
         run: |
           cp server.cjs dist/server.cjs
-          cp package.json dist/package.json
+          echo '{
+            "name": "redcar-frontend",
+            "version": "1.0.0",
+            "scripts": {
+              "start": "node server.cjs"
+            },
+            "dependencies": {
+              "express": "^5.2.1"
+            }
+          }' > dist/package.json
           cd dist
           zip -r ../deploy.zip .
 
