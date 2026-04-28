@@ -80,7 +80,7 @@ function LoginPage() {
         </form>
 
         <p className={styles.footer}>
-          ¿Eres cliente? <a href="/" className={styles.link}>Busca tu vehículo aquí</a>
+          ¿Eres cliente? <a href="/" className={styles.link}>Genera una Reserva Aquí</a>
         </p>
       </div>
     </div>
