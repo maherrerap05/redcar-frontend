@@ -25,6 +25,27 @@ export async function buscarConductores(filtros) {
   }
 }
 
+export async function getConductorPorIdentificacion(numeroIdentificacion) {
+  const response = await api.get(
+    `/marketplace/conductores/identificacion/${numeroIdentificacion}`
+  )
+  return response.data.data
+}
+
+export async function crearConductorBooking(datos) {
+  const payload = {
+    ...datos,
+    // numero_licencia se asigna en el backend automáticamente
+    // si no viene, pero lo enviamos igual por consistencia
+    numero_licencia: datos.numero_licencia || datos.numero_identificacion,
+    creado_por_usuario: 'BOOKING_WEB',
+    modificado_desde_ip: '127.0.0.1',
+    origen_registro: 'WEB',
+  }
+  const response = await api.post('/marketplace/conductores', payload)
+  return response.data.data
+}
+
 export async function crearConductor(datos, usuario) {
   const payload = {
     ...datos,

@@ -222,7 +222,7 @@ function ReservasPage() {
                         <button
                           className={styles.btnEliminar}
                           onClick={() => abrirEliminar(r)}
-                          disabled={r.estado_reserva === 'CAN' || r.es_eliminado}
+                          disabled={r.estado_reserva === 'CON' || r.estado_reserva === 'CAN' || r.es_eliminado}
                         >Eliminar</button>
                       </div>
                     </td>

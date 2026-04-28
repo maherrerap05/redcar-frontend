@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getExtras, getConductorPorLicencia } from '../../api/bookingApi'
+import { getExtras } from '../../api/bookingApi'
+import { getConductorPorIdentificacion, crearConductorBooking } from '../../api/conductoresApi'
 import styles from './BookingExtrasPage.module.css'
 
 function BookingNavBar({ paso }) {
@@ -20,9 +21,8 @@ function BookingNavBar({ paso }) {
 }
 
 const FORM_CONDUCTOR_VACIO = {
-  numero_licencia: '',
-  tipo_identificacion: 'CED',
   numero_identificacion: '',
+  tipo_identificacion: 'CED',
   con_nombre1: '',
   con_nombre2: '',
   con_apellido1: '',
@@ -33,17 +33,17 @@ const FORM_CONDUCTOR_VACIO = {
   con_correo: '',
   // Control interno
   _encontrado: false,
-  _bloqueado: false,  // true cuando conductor existe pero está inactivo/eliminado
+  _bloqueado: false,
   _id_conductor: null,
 }
 
 // Sanitiza input: elimina caracteres peligrosos para SQL injection y XSS
 function sanitizar(valor) {
   return valor
-    .replace(/['"`;\\<>{}()|]/g, '')   // SQL injection y XSS básico
-    .replace(/--/g, '')                   // Comentarios SQL
-    .replace(/\/\*/g, '')              // Comentarios SQL bloque
-    .replace(/\s{2,}/g, ' ')            // Espacios múltiples → uno solo
+    .replace(/['"`;\\<>{}()|]/g, '')
+    .replace(/--/g, '')
+    .replace(/\/\*/g, '')
+    .replace(/\s{2,}/g, ' ')
 }
 
 // Solo letras, tildes, espacios y guiones (para nombres y apellidos)
@@ -51,9 +51,9 @@ function soloLetras(valor) {
   return valor.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s-]/g, '')
 }
 
-// Solo alfanumérico y guiones (para licencias e identificaciones)
-function soloAlfanumerico(valor) {
-  return valor.replace(/[^a-zA-Z0-9\-]/g, '')
+// Solo dígitos (para cédula/RUC — en Ecuador la identificación es numérica)
+function soloNumerico(valor) {
+  return valor.replace(/[^0-9]/g, '')
 }
 
 // Solo dígitos y + para teléfonos
@@ -65,25 +65,27 @@ function FormConductor({ index, conductor, onChange, onRemove, esPrincipal }) {
   const [buscando, setBuscando] = useState(false)
   const [errorBusqueda, setErrorBusqueda] = useState(null)
   const [errorVencimiento, setErrorVencimiento] = useState(null)
-  const [licenciaInput, setLicenciaInput] = useState(conductor.numero_licencia || '')
+  const [identificacionInput, setIdentificacionInput] = useState(
+    conductor.numero_identificacion || ''
+  )
 
-  async function buscarPorLicencia() {
-    if (!licenciaInput.trim()) return
+  async function buscarPorIdentificacion() {
+    if (!identificacionInput.trim()) return
     setBuscando(true)
     setErrorBusqueda(null)
     try {
-      const data = await getConductorPorLicencia(licenciaInput.trim())
+      const data = await getConductorPorIdentificacion(identificacionInput.trim())
       if (data) {
         // Verificar que el conductor esté activo y no eliminado
         if (data.estado_conductor !== 'ACT' || data.es_eliminado) {
           setErrorBusqueda(
-            'Este conductor no está disponible. Por favor ingresa una licencia diferente o registra un nuevo conductor.'
+            'Este conductor no está disponible. Por favor ingresa una identificación diferente o registra un nuevo conductor.'
           )
           onChange(index, {
             ...FORM_CONDUCTOR_VACIO,
-            numero_licencia: licenciaInput.trim(),
+            numero_identificacion: identificacionInput.trim(),
             _encontrado: false,
-            _bloqueado: true,   // bloquea el formulario
+            _bloqueado: true,
             _id_conductor: null,
           })
           return
@@ -91,9 +93,8 @@ function FormConductor({ index, conductor, onChange, onRemove, esPrincipal }) {
         // Conductor activo — autocompletar formulario
         onChange(index, {
           ...conductor,
-          numero_licencia: data.numero_licencia,
-          tipo_identificacion: data.tipo_identificacion,
           numero_identificacion: data.numero_identificacion,
+          tipo_identificacion: data.tipo_identificacion,
           con_nombre1: data.con_nombre1,
           con_nombre2: data.con_nombre2 || '',
           con_apellido1: data.con_apellido1,
@@ -110,9 +111,9 @@ function FormConductor({ index, conductor, onChange, onRemove, esPrincipal }) {
       setErrorBusqueda('Conductor no encontrado. Puedes registrarlo manualmente.')
       onChange(index, {
         ...FORM_CONDUCTOR_VACIO,
-        numero_licencia: licenciaInput.trim(),
+        numero_identificacion: identificacionInput.trim(),
         _encontrado: false,
-        _bloqueado: false,  // puede registrar nuevo
+        _bloqueado: false,
         _id_conductor: null,
       })
     } finally {
@@ -124,28 +125,22 @@ function FormConductor({ index, conductor, onChange, onRemove, esPrincipal }) {
     const { name, value } = e.target
     let valorLimpio = value
 
-    // Sanitizar según el tipo de campo
     if (['con_nombre1', 'con_nombre2', 'con_apellido1', 'con_apellido2'].includes(name)) {
       valorLimpio = soloLetras(value)
-    } else if (name === 'numero_licencia') {
-      valorLimpio = soloAlfanumerico(value)
     } else if (name === 'tipo_identificacion') {
       // Al cambiar tipo, limpiar número de identificación
       onChange(index, { ...conductor, tipo_identificacion: value, numero_identificacion: '' })
       return
     } else if (name === 'numero_identificacion') {
-      // Solo dígitos para cédula y RUC
-      valorLimpio = value.replace(/[^0-9]/g, '')
+      valorLimpio = soloNumerico(value)
     } else if (name === 'con_telefono') {
       valorLimpio = soloTelefono(value)
     } else if (name === 'con_correo') {
-      // Correo: sin espacios en ninguna posición, sin caracteres peligrosos
       valorLimpio = value.replace(/\s/g, '').replace(/['"`;\\<>{}()|]/g, '')
     } else {
       valorLimpio = sanitizar(value)
     }
 
-    // Eliminar espacios al inicio en todos los demás campos
     if (!['con_correo', 'con_telefono'].includes(name)) {
       valorLimpio = valorLimpio.trimStart()
     }
@@ -164,28 +159,37 @@ function FormConductor({ index, conductor, onChange, onRemove, esPrincipal }) {
         )}
       </div>
 
-      {/* Búsqueda por licencia */}
+      {/* Búsqueda por número de identificación */}
       <div className={styles.busquedaRow}>
         <div className={styles.fieldGroup} style={{ flex: 1 }}>
-          <label className={styles.label}>Número de licencia *</label>
+          <label className={styles.label}>Número de identificación *</label>
           <input
             className={styles.input}
-            value={licenciaInput}
+            value={identificacionInput}
             onChange={e => {
-              const limpio = soloAlfanumerico(e.target.value).trimStart()
-              setLicenciaInput(limpio)
+              const limpio = soloNumerico(e.target.value).trimStart()
+              setIdentificacionInput(limpio)
               setErrorBusqueda(null)
-              onChange(index, { ...conductor, _bloqueado: false, _encontrado: false, _id_conductor: null })
+              onChange(index, {
+                ...conductor,
+                _bloqueado: false,
+                _encontrado: false,
+                _id_conductor: null,
+              })
             }}
-            onKeyDown={e => e.key === 'Enter' && buscarPorLicencia()}
-            placeholder="Ej: L-12345678"
-            maxLength={30}
+            onKeyDown={e => e.key === 'Enter' && buscarPorIdentificacion()}
+            placeholder={
+              conductor.tipo_identificacion === 'RUC'
+                ? 'Ej: 0102030405001'
+                : 'Ej: 0102030405'
+            }
+            maxLength={conductor.tipo_identificacion === 'RUC' ? 13 : 10}
           />
         </div>
         <button
           className={styles.btnBuscarLicencia}
-          onClick={buscarPorLicencia}
-          disabled={buscando || !licenciaInput.trim()}
+          onClick={buscarPorIdentificacion}
+          disabled={buscando || !identificacionInput.trim()}
         >
           {buscando ? '…' : '🔍 Buscar'}
         </button>
@@ -202,7 +206,13 @@ function FormConductor({ index, conductor, onChange, onRemove, esPrincipal }) {
       <div className={styles.formGrid}>
         <div className={styles.fieldGroup}>
           <label className={styles.label}>Tipo de identificación *</label>
-          <select name="tipo_identificacion" value={conductor.tipo_identificacion} onChange={cambiar} className={styles.select} disabled={conductor._encontrado || conductor._bloqueado}>
+          <select
+            name="tipo_identificacion"
+            value={conductor.tipo_identificacion}
+            onChange={cambiar}
+            className={styles.select}
+            disabled={conductor._encontrado || conductor._bloqueado}
+          >
             <option value="CED">Cédula</option>
             <option value="RUC">RUC</option>
           </select>
@@ -238,7 +248,13 @@ function FormConductor({ index, conductor, onChange, onRemove, esPrincipal }) {
         </div>
         <div className={styles.fieldGroup}>
           <label className={styles.label}>Edad *</label>
-          <select name="edad_conductor" value={conductor.edad_conductor} onChange={cambiar} className={styles.select} disabled={conductor._encontrado || conductor._bloqueado}>
+          <select
+            name="edad_conductor"
+            value={conductor.edad_conductor}
+            onChange={cambiar}
+            className={styles.select}
+            disabled={conductor._encontrado || conductor._bloqueado}
+          >
             <option value="">Selecciona edad...</option>
             {Array.from({ length: 83 }, (_, i) => i + 18).map(edad => (
               <option key={`edad-${edad}`} value={edad}>{edad} años</option>
@@ -299,19 +315,17 @@ function BookingExtrasPage() {
   const [errores, setErrores] = useState([])
   const [extrasExpandido, setExtrasExpandido] = useState(false)
 
-  // Restaurar estado previo del localStorage si el usuario volvió
   const [extrasSeleccionados, setExtrasSeleccionados] = useState(() => {
     const guardado = JSON.parse(localStorage.getItem('redcar_reserva') || '{}')
     if (!guardado.extras?.length) return {}
     return guardado.extras.reduce((acc, e) => ({ ...acc, [e.id_extra]: e.cantidad }), {})
   })
+
   const [conductores, setConductores] = useState(() => {
     const guardado = JSON.parse(localStorage.getItem('redcar_reserva') || '{}')
     if (!guardado.conductores?.length) return [{ ...FORM_CONDUCTOR_VACIO }]
-    // Restaurar conductores con sus datos completos
     return guardado.conductores.map(c => ({
       ...FORM_CONDUCTOR_VACIO,
-      numero_licencia: c.numero_licencia || '',
       tipo_identificacion: c.tipo_identificacion || 'CED',
       numero_identificacion: c.numero_identificacion || '',
       con_nombre1: c.con_nombre1 || '',
@@ -324,8 +338,6 @@ function BookingExtrasPage() {
       edad_conductor: c.edad_conductor || '',
       con_telefono: c.con_telefono || '',
       con_correo: c.con_correo || '',
-      // _encontrado = true si el conductor existe en el sistema (tiene id_conductor asignado)
-      // _nuevo = false significa que vino del sistema, por lo que debe estar bloqueado
       _encontrado: c._nuevo === false || !!c._id_conductor,
       _bloqueado: false,
       _id_conductor: c.id_conductor || c._id_conductor || null,
@@ -384,12 +396,6 @@ function BookingExtrasPage() {
     conductores.forEach((c, i) => {
       const n = i + 1
 
-      // Número de licencia
-      if (!c.numero_licencia?.trim())
-        errs.push(`Conductor ${n}: número de licencia requerido`)
-      else if (c.numero_licencia.length > 30)
-        errs.push(`Conductor ${n}: la licencia no puede exceder 30 caracteres`)
-
       // Número de identificación
       if (!c.numero_identificacion?.trim()) {
         errs.push(`Conductor ${n}: número de identificación requerido`)
@@ -444,6 +450,7 @@ function BookingExtrasPage() {
         errs.push(`Conductor ${n}: la licencia vence antes de la devolución del vehículo`)
       }
     })
+
     setErrores(errs)
     return errs.length === 0
   }
@@ -466,19 +473,21 @@ function BookingExtrasPage() {
     if (!validar()) return
 
     const totales = calcularTotales()
+
     const extrasPayload = Object.entries(extrasSeleccionados).map(([id, cantidad]) => {
       const extra = extrasDisponibles.find(e => String(e.id_extra) === String(id))
       return {
         id_extra: Number(id),
         cantidad: Number(cantidad),
         estado_reserva_extra: 'ACT',
-        nombre_extra: extra?.nombre_extra ?? '',   // guardamos el nombre para mostrarlo en confirmación
+        nombre_extra: extra?.nombre_extra ?? '',
       }
     })
 
     const conductoresPayload = conductores.map((c, i) => ({
       id_conductor: c._id_conductor || null,
-      numero_licencia: c.numero_licencia,
+      // numero_licencia = numero_identificacion por equivalencia en Ecuador
+      numero_licencia: c.numero_identificacion,
       tipo_identificacion: c.tipo_identificacion,
       numero_identificacion: c.numero_identificacion,
       con_nombre1: c.con_nombre1,
@@ -518,13 +527,15 @@ function BookingExtrasPage() {
       <div className={styles.container}>
         <div className={styles.layout}>
           <main className={styles.content}>
-            {/* Conductores — primero */}
+            {/* Conductores */}
             <section className={styles.section}>
               <div className={styles.sectionHeader}>
                 <span className={styles.sectionIcon}>👤</span>
                 <div>
                   <h2 className={styles.sectionTitle}>Conductores autorizados</h2>
-                  <p className={styles.sectionSub}>Registra las personas autorizadas a conducir el vehículo durante la reserva. El primero será el conductor principal.</p>
+                  <p className={styles.sectionSub}>
+                    Registra las personas autorizadas a conducir el vehículo durante la reserva. El primero será el conductor principal.
+                  </p>
                 </div>
               </div>
 
@@ -550,7 +561,7 @@ function BookingExtrasPage() {
               )}
             </section>
 
-            {/* Extras — colapsable, después de conductores */}
+            {/* Extras — colapsable */}
             <section className={styles.section}>
               <div
                 className={styles.sectionHeaderColapsable}
@@ -575,7 +586,9 @@ function BookingExtrasPage() {
               {extrasExpandido && (
                 <>
                   {cargando ? (
-                    <div className={styles.loadingInline}><div className={styles.spinner} /> Cargando extras…</div>
+                    <div className={styles.loadingInline}>
+                      <div className={styles.spinner} /> Cargando extras…
+                    </div>
                   ) : extrasDisponibles.length === 0 ? (
                     <p className={styles.noExtras}>No hay extras disponibles.</p>
                   ) : (
