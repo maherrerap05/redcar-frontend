@@ -56,9 +56,23 @@ export async function eliminarVehiculo(id, motivo, usuario) {
 export async function buscarVehiculos(filtros) {
   const response = await api.post('/vehiculos/buscar', filtros)
   const data = response.data.data
-  // el endpoint buscar puede devolver { items: [...] } o directamente un array
-  if (Array.isArray(data)) return data
-  if (data?.items) return data.items
-  if (data?.vehiculos) return data.vehiculos
-  return []
+
+  // El endpoint devuelve paginación — normalizar igual que getVehiculos
+  if (data?.items) {
+    return {
+      items: data.items || [],
+      totalPaginas: data.totalPages || 1,
+      totalRegistros: data.totalRecords || 0,
+      paginaActual: data.pageNumber || 1,
+    }
+  }
+
+  // Fallback por si el backend devuelve array directo
+  const items = Array.isArray(data) ? data : (data?.vehiculos || [])
+  return {
+    items,
+    totalPaginas: 1,
+    totalRegistros: items.length,
+    paginaActual: 1,
+  }
 }

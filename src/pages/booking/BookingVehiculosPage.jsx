@@ -74,7 +74,7 @@ function VehiculoCard({ vehiculo, busqueda, onSeleccionar }) {
           <span className={styles.spec}>👥 {v.capacidadPasajeros} pasajeros</span>
           <span className={styles.spec}>🧳 {v.capacidadMaletas} maletas</span>
           <span className={styles.spec}>🚪 {v.numeroPuertas} puertas</span>
-          <span className={styles.spec}>⚙️ {v.transmision === 'AUTOMATICA' ? 'Automático' : 'Manual'}</span>
+          <span className={styles.spec}>⚙️ {(v.transmision || '').toUpperCase() === 'AUTOMATICA' ? 'Automático' : 'Manual'}</span>
           <span className={styles.spec}>⛽ {v.combustible}</span>
           {v.aireAcondicionado && <span className={styles.spec}>❄️ A/C</span>}
         </div>
@@ -169,7 +169,9 @@ function BookingVehiculosPage() {
       resultado = resultado.filter(v => String(v.id_categoria_vehiculo) === String(f.idCategoria))
     }
     if (f.transmision) {
-      resultado = resultado.filter(v => v.tipo_transmision === f.transmision)
+      resultado = resultado.filter(v =>
+        (v.tipo_transmision || '').toUpperCase() === f.transmision.toUpperCase()
+      )
     }
     if (f.sort === 'precio_desc') {
       resultado.sort((a, b) => (b.precio_base_dia || 0) - (a.precio_base_dia || 0))
