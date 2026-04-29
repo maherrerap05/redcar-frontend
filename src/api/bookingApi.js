@@ -100,11 +100,12 @@ export async function getConductorPorLicencia(numeroLicencia) {
   return response.data.data
 }
 
+// DESPUÉS
 export async function crearConductorPublico(datos) {
-  // Algunos campos son requeridos por el validator aunque el controller los sobreescriba
   const payload = {
     ...datos,
-    // Generar codigo_conductor único si no viene
+    // En Ecuador numero_licencia = numero_identificacion
+    numero_licencia: datos.numero_licencia || datos.numero_identificacion,
     codigo_conductor: datos.codigo_conductor || `CW-${Date.now().toString().slice(-8)}`,
     creado_por_usuario: 'BOOKING_WEB',
     modificado_desde_ip: '0.0.0.0',
